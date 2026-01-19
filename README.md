@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18295023.svg)](https://doi.org/10.5281/zenodo.18295023)
+
 # 🧬 Bio-Kernel v4.0.1: The Genomic Operating Layer
 > **Level: GOD MODE ACTIVATED** | Enterprise Architecture | ISO/IEEE Compliant
 
@@ -544,3 +546,4 @@ específico establecer la variable `BK_DEVICE`, por ejemplo `BK_DEVICE=cuda:0`.
 Cuando hay múltiples GPUs se puede inicializar `torch.distributed` (backend
 ``nccl`` o ``gloo``) y el entrenador federado promediará pesos usando
 `all_reduce`.
+
