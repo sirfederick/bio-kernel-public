@@ -547,3 +547,4 @@ Cuando hay múltiples GPUs se puede inicializar `torch.distributed` (backend
 ``nccl`` o ``gloo``) y el entrenador federado promediará pesos usando
 `all_reduce`.
 
+
