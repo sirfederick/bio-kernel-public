@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software or methodology, please cite it as below."
+authors:
+  - family-names: "Federick"
+    given-names: "Sir"
+    # orcid: "https://orcid.org/0000-0000-0000-0000" # Optional if you have one
+title: "Bio-Kernel: An Alignment-Free Token Pattern Mining Framework for Genomics"
+version: 1.0.0-lite
+date-released: 2026-01-19
+url: "https://github.com/sirfederick/bio-kernel-public"
+license: AGPL-3.0
+keywords:
+  - genomics
+  - pattern-mining
+  - reverse-engineering
+  - legacy-code
+  - bioinformatics
+  - python
+abstract: "Bio-Kernel is an experimental alignment-free pattern mining framework designed to treat genomic sequences as legacy code. It converts DNA into token streams and identifies high-entropy recurrent structures (survivor signatures) against rigorous null-hypothesis testing."
