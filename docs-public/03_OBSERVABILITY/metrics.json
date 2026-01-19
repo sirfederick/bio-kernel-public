@@ -1,0 +1,15 @@
+{
+  "run_date": "2026-01-19",
+  "scope": "full_genome_t2t_chm13",
+  "stats": {
+    "chromosomes": 24,
+    "genes": 19821,
+    "patterns_evaluated": 76,
+    "simulations_per_pattern": 1000,
+    "survivors": 18
+  },
+  "top_signals": [
+    {"id": "TRIDENT-SIG-76", "z_score": 6.63, "p_value": 0.000999},
+    {"id": "TRIDENT-SIG-110", "z_score": 4.68, "p_value": 0.000999}
+  ]
+}

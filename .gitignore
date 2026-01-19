@@ -1,0 +1,26 @@
+# Public repo: docs-only
+**/.env
+**/.venv
+**/__pycache__/
+**/.pytest_cache/
+**/.hypothesis/
+**/data/
+**/models/
+**/bin/
+**/output/
+**/logs/
+**/reports/
+**/temp/
+**/kernel_*/
+**/agent_loop/
+**/tools/
+**/scripts/
+**/kubernetes/
+**/ghidra_scripts/
+**/lief/
+**/unknown_engine/
+**/ray/
+# Allow docs
+!docs-public/
+!README.md
+!LICENSE
