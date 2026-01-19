@@ -1,4 +1,5 @@
-# Public repo: docs-only
+# Public repo: docs + representative core structure
+# Exclude strict secrets and heavy artifacts
 **/.env
 **/.venv
 **/__pycache__/
@@ -9,18 +10,28 @@
 **/bin/
 **/output/
 **/logs/
-**/reports/
+**/reports/raw/
 **/temp/
-**/kernel_*/
-**/agent_loop/
 **/tools/
 **/scripts/
 **/kubernetes/
 **/ghidra_scripts/
 **/lief/
-**/unknown_engine/
 **/ray/
-# Allow docs
+
+# Allow specific documentation and structure
 !docs-public/
 !README.md
 !LICENSE
+
+# Allow specific representative files (Whitelist)
+!autonomous_god_mode.py
+!agent_loop/README.md
+!agent_loop/orchestrator.py
+!audit_flows/README.md
+!audit_flows/run_agent_loop.py
+!kernel_brain_main/README.md
+!kernel_genomics_rag/README.md
+!kernel_quantum/README.md
+!kernel_unknown_engine/README.md
+
