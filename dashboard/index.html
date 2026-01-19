@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bio-Kernel 360 | Genome Intelligence</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=JetBrains+Mono:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --bg: #03040b;
+        --panel: rgba(15, 18, 30, 0.7);
+        --accent: #00ff9d;
+        --accent-secondary: #6d28d9;
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      #bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.4;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 50px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 20px;
+      }
+
+      .logo-group h1 {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+        background: linear-gradient(
+          90deg,
+          var(--accent),
+          var(--accent-secondary)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .logo-group p {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 25px;
+      }
+
+      .card {
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+          0 0 20px rgba(0, 255, 157, 0.05);
+      }
+
+      .card h3 {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card h3::before {
+        content: "";
+        width: 4px;
+        height: 14px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+
+      .stats-main {
+        grid-column: span 3;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+        margin: 10px 0;
+      }
+
+      .stat-label {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+      }
+
+      .chart-container {
+        grid-column: span 6;
+        height: 350px;
+      }
+
+      .gene-list {
+        grid-column: span 6;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .gene-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+      }
+
+      .gene-item:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+      }
+
+      .badge-kernel {
+        background: rgba(0, 255, 157, 0.1);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .badge-patch {
+        background: rgba(109, 40, 217, 0.1);
+        color: #a78bfa;
+        border: 1px solid #6d28d9;
+      }
+      .badge-unknown {
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        border: 1px solid #334155;
+      }
+
+      .progress-grid {
+        grid-column: span 12;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .chrom-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .chrom-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .chrom-progress-bar {
+        width: 100%;
+        height: 4px;
+        background: #1e293b;
+        margin-top: 10px;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .chrom-progress-fill {
+        height: 100%;
+        background: var(--accent);
+        width: 0%;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Ambient Glow */
+      .glow {
+        position: fixed;
+        width: 40vw;
+        height: 40vw;
+        background: radial-gradient(
+          circle,
+          rgba(109, 40, 217, 0.1) 0%,
+          transparent 70%
+        );
+        top: -10vw;
+        right: -10vw;
+        z-index: -2;
+        filter: blur(80px);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+      <header>
+        <div class="logo-group">
+          <h1>BIO-KERNEL <span style="font-weight: 300">360</span></h1>
+          <p>Distributed Genomics Intelligence & Reverse Engineering Engine</p>
+        </div>
+        <div
+          id="system-clock"
+          style="font-family: 'JetBrains Mono'; color: var(--accent)"
+        >
+          00:00:00
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- Summary Stats -->
+        <div class="card stats-main">
+          <h3>Total Genes</h3>
+          <div class="stat-value" id="val-total">0</div>
+          <div class="stat-label">Mapped sequences</div>
+        </div>
+        <div class="card stats-main">
+          <h3>Decoded</h3>
+          <div
+            class="stat-value"
+            id="val-completed"
+            style="color: var(--accent)"
+          >
+            0
+          </div>
+          <div class="stat-label">Trident analysis done</div>
+        </div>
+        <div class="card stats-main" style="grid-column: span 6">
+          <h3>System Status</h3>
+          <div
+            style="
+              display: flex;
+              justify-content: space-around;
+              padding-top: 10px;
+            "
+          >
+            <div>
+              <div class="stat-value" id="val-rl" style="font-size: 1.5rem">
+                0.00
+              </div>
+              <div class="stat-label">RL Avg Reward</div>
+            </div>
+            <div>
+              <div class="stat-value" id="val-zmq" style="font-size: 1.5rem">
+                0
+              </div>
+              <div class="stat-label">ZMQ Messages</div>
+            </div>
+            <div>
+              <div class="stat-value" id="val-sync" style="font-size: 1.5rem">
+                0
+              </div>
+              <div class="stat-label">Federated Syncs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="card chart-container">
+          <h3>Classification Breakdown</h3>
+          <canvas id="classificationChart"></canvas>
+        </div>
+
+        <div class="card chart-container">
+          <h3>RL Training Progress</h3>
+          <canvas id="rlChart"></canvas>
+        </div>
+
+        <!-- Intelligence Oracle -->
+        <div class="card" style="grid-column: span 12; margin-top: 25px;">
+          <h3>🧠 Scientific Oracle Hypotheses (AI)</h3>
+          <div id="oracle-insights" style="max-height: 300px; overflow-y: auto; font-family: 'JetBrains Mono'; font-size: 0.9rem; line-height: 1.6; color: #cbd5e1;">
+            En espera de análisis del mega-cerebro...
+          </div>
+        </div>
+
+        <!-- Genome Map -->
+        <div class="card" style="grid-column: span 12">
+          <h3>Execution Map: Chromosome Progress</h3>
+          <div class="progress-grid" id="chrom-grid">
+            <!-- Dynamic -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Init Wall Background
+      const canvas = document.getElementById("bg-canvas");
+      const ctx = canvas.getContext("2d");
+      let width, height;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      const dots = [];
+      for (let i = 0; i < 80; i++) {
+        dots.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#00ff9d";
+        dots.forEach((d) => {
+          d.x += d.vx;
+          d.y += d.vy;
+          if (d.x < 0 || d.x > width) d.vx *= -1;
+          if (d.y < 0 || d.y > height) d.vy *= -1;
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, 1, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+
+      // CHARTS
+      const classChart = new Chart(
+        document.getElementById("classificationChart"),
+        {
+          type: "doughnut",
+          data: {
+            labels: ["Kernel", "Patch", "Unknown", "Evolved"],
+            datasets: [
+              {
+                data: [0, 0, 0, 0],
+                backgroundColor: ["#00ff9d", "#6d28d9", "#1e293b", "#3b82f6"],
+                borderWidth: 0,
+                hoverOffset: 15,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: "#94a3b8", font: { family: "Outfit" } },
+              },
+            },
+          },
+        }
+      );
+
+      const rlChart = new Chart(document.getElementById("rlChart"), {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Reward",
+              data: [],
+              borderColor: "#00ff9d",
+              tension: 0.4,
+              fill: true,
+              backgroundColor: "rgba(0, 255, 157, 0.05)",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              grid: { color: "rgba(255,255,255,0.05)" },
+              ticks: { color: "#94a3b8" },
+            },
+            x: { grid: { display: false }, ticks: { display: false } },
+          },
+        },
+      });
+
+      // UPDATE DATA
+      async function updateData() {
+        try {
+          // 1. Genomics Stats
+          const genRes = await fetch("/genomics_stats");
+          const genData = await genRes.json();
+
+          document.getElementById("val-total").innerText = genData.total_genes;
+
+          let completed = 0;
+          Object.values(genData.chromosomes).forEach(
+            (c) => (completed += c.completed)
+          );
+          document.getElementById("val-completed").innerText = completed;
+
+          // Update Chart
+          const v = genData.verdicts;
+          classChart.data.datasets[0].data = [
+            v["Kernel Maestro (Conservado)"] || 0,
+            v["Human Update Patch (Único)"] || 0,
+            v["unknown"] || 0,
+            v["Módulo Evolucionado"] || 0,
+          ];
+          classChart.update();
+
+          // Update Grid
+          const grid = document.getElementById("chrom-grid");
+          grid.innerHTML = "";
+          Object.entries(genData.chromosomes)
+            .sort()
+            .forEach(([name, stats]) => {
+              const perc = (stats.completed / (stats.total || 1)) * 100;
+              grid.innerHTML += `
+                        <div class="chrom-box">
+                            <div class="chrom-name">${name.toUpperCase()}</div>
+                            <div class="stat-label">${stats.completed}/${
+                stats.total
+              }</div>
+                            <div class="chrom-progress-bar">
+                                <div class="chrom-progress-fill" style="width: ${perc}%"></div>
+                            </div>
+                        </div>
+                    `;
+            });
+
+          // 2. RL Stats
+          const rlRes = await fetch("/rl_metrics");
+          const rlData = await rlRes.json();
+          const rewards = rlData.rewards["kernel_quantum"] || [];
+          if (rewards.length > 0) {
+            const avg = rewards.reduce((a, b) => a + b, 0) / rewards.length;
+            document.getElementById("val-rl").innerText = avg.toFixed(2);
+
+            rlChart.data.labels = rewards.map((_, i) => i);
+            rlChart.data.datasets[0].data = rewards;
+            rlChart.update();
+          }
+
+          // 3. System Components
+          const zmqRes = await fetch("/zmq_metrics");
+          const zmqData = await zmqRes.json();
+          document.getElementById("val-zmq").innerText = zmqData.messages;
+
+          const fedRes = await fetch("/federated_metrics");
+          const fedData = await fedRes.json();
+          document.getElementById("val-sync").innerText = fedData.syncs;
+
+          // 4. Oracle Insights
+          const oraRes = await fetch("/oracle_insights");
+          const oraData = await oraRes.json();
+          const oraDiv = document.getElementById("oracle-insights");
+          if (oraData.length > 0) {
+            oraDiv.innerHTML = oraData.map(f => `
+              <div style="margin-bottom: 15px; border-left: 2px solid var(--accent); padding-left: 10px;">
+                <span style="color: var(--accent); font-weight: bold;">[${f.gene_id}]</span> 
+                <span class="badge ${f.verdict.includes('Patch') ? 'badge-patch' : 'badge-kernel'}">${f.verdict}</span>
+                <p style="margin-top: 5px; color: #94a3b8;">${f.hypothesis}</p>
+              </div>
+            `).join("");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      setInterval(updateData, 2000);
+      updateData();
+
+      // Clock
+      setInterval(() => {
+        document.getElementById("system-clock").innerText =
+          new Date().toLocaleTimeString();
+      }, 1000);
+    </script>
+  </body>
+</html>

@@ -9,13 +9,11 @@
 **/models/
 **/bin/
 **/output/
-**/logs/
+# Logs: Structure allowed via README, but no .log/.ndjson files
+**/logs/*.log
+**/logs/*.ndjson
 **/reports/raw/
 **/temp/
-**/tools/
-**/scripts/
-**/kubernetes/
-**/ghidra_scripts/
 **/lief/
 **/ray/
 
@@ -23,15 +21,43 @@
 !docs-public/
 !README.md
 !LICENSE
+!requirements.txt
+!requirements-dev.txt
+!docker-compose.yaml
+!tox.ini
 
-# Allow specific representative files (Whitelist)
+# Allow Whitelisted Modules/Files to show Architecture
+
+# 1. Core Entry Points
 !autonomous_god_mode.py
-!agent_loop/README.md
-!agent_loop/orchestrator.py
-!audit_flows/README.md
-!audit_flows/run_agent_loop.py
+
+# 2. Agent Loop (Full Orchestration logic)
+!agent_loop/
+
+# 3. Tools (Build & Analysis Utilities)
+!tools/
+!tools/analyze_binary.py
+!tools/build_all.py
+
+# 4. Scripts (Core Binarizer Logic)
+!scripts/utils/
+!scripts/utils/chromosome_binarizer.py
+
+# 5. Dashboard (UI/Visualization)
+!dashboard/
+
+# 6. Ghidra Integration (Methodology showcase)
+!ghidra_scripts/
+!ghidra_scripts/bio_disassembler.py
+
+# 7. Core Kernels (Structure + READMEs Only)
 !kernel_brain_main/README.md
 !kernel_genomics_rag/README.md
 !kernel_quantum/README.md
 !kernel_unknown_engine/README.md
+!audit_flows/README.md
+!audit_flows/run_agent_loop.py
+
+# 8. Logs (Only the directory structure/README)
+!logs/README_LOGS.md
 

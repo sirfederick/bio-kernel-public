@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Kernel 360 | G.I.D.E.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #050505; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); }
+        .tab-active { border-bottom: 2px solid #00ff9d; color: #00ff9d; }
+        .tab-inactive { color: #6b7280; }
+        .tab-inactive:hover { color: #d1d5db; }
+        .neon-text { text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
+        
+        /* Matrix Animation */
+        .matrix-cell { transition: all 0.3s; }
+        .matrix-cell:hover { transform: scale(1.1); background: rgba(0, 255, 157, 0.2); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-hidden relative">
+    <!-- Background Grid -->
+    <div class="absolute inset-0 z-[-1]" style="background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 30px 30px; opacity: 0.2;"></div>
+
+    <!-- Header -->
+    <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass z-10">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-bold tracking-wider text-white"><span class="text-[#00ff9d]">BIO-KERNEL</span> 360</h1>
+            <span class="px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-400 mono">v2.4.0-RC1</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div id="system-status" class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-xs text-green-500 font-bold tracking-wide">SYSTEM ONLINE</span>
+            </div>
+            <div class="text-sm mono text-gray-400" id="clock">00:00:00</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col p-6 overflow-hidden">
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-800 mb-6">
+            <button onclick="switchTab('global')" id="btn-global" class="px-6 py-3 text-sm font-medium transition-colors tab-active">
+                GLOBAL / BI
+            </button>
+            <button onclick="switchTab('quantum')" id="btn-quantum" class="px-6 py-3 text-sm font-medium transition-colors tab-inactive">
+                KERNEL QUANTUM
+            </button>
+            <button onclick="switchTab('unknown')" id="btn-unknown" class="px-6 py-3 text-sm font-medium transition-colors tab-inactive">
+                KERNEL UNKNOWN
+            </button>
+            <button onclick="switchTab('rag')" id="btn-rag" class="px-6 py-3 text-sm font-medium transition-colors tab-inactive">
+                GENOMICS RAG
+            </button>
+        </div>
+
+        <!-- Views -->
+        <div class="flex-1 relative">
+            
+            <!-- VIEW: GLOBAL -->
+            <div id="view-global" class="absolute inset-0 flex flex-col gap-6 transition-opacity opacity-100 z-10">
+                <!-- KPI Row -->
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="glass p-4 rounded-xl">
+                        <div class="text-gray-500 text-xs uppercase tracking-wider mb-1">Total Genes</div>
+                        <div class="text-2xl font-bold mono text-white" id="stat-genes">0</div>
+                    </div>
+                    <div class="glass p-4 rounded-xl">
+                        <div class="text-gray-500 text-xs uppercase tracking-wider mb-1">Knowledge Base</div>
+                        <div class="text-2xl font-bold mono text-[#a78bfa]" id="stat-kb">0</div>
+                    </div>
+                    <div class="glass p-4 rounded-xl">
+                        <div class="text-gray-500 text-xs uppercase tracking-wider mb-1">Decoded Chr</div>
+                        <div class="text-2xl font-bold mono text-[#00ff9d]" id="stat-decoded">0</div>
+                    </div>
+                    <div class="glass p-4 rounded-xl">
+                        <div class="text-gray-500 text-xs uppercase tracking-wider mb-1">Active Agents</div>
+                        <div class="text-2xl font-bold mono text-blue-400">5</div>
+                    </div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-3 gap-6 flex-1 min-h-0">
+                    <!-- Execution Matrix -->
+                    <div class="col-span-2 glass rounded-xl p-5 flex flex-col">
+                        <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-4 bg-[#00ff9d] rounded-sm"></span>
+                            GLOBAL EXECUTION MATRIX
+                        </h3>
+                        <div id="chrom-grid" class="grid grid-cols-8 gap-3 content-start overflow-y-auto pr-2">
+                            <!-- JS Populates this -->
+                        </div>
+                    </div>
+
+                    <!-- Feed -->
+                    <div class="col-span-1 glass rounded-xl p-5 flex flex-col">
+                        <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-4 bg-blue-500 rounded-sm"></span>
+                            LIVE INTELLIGENCE FEED
+                        </h3>
+                        <div id="live-feed" class="flex-1 overflow-y-auto space-y-3 pr-2 mono text-xs">
+                            <div class="p-3 bg-gray-900/50 rounded border border-gray-800">
+                                <span class="text-gray-500">[SYSTEM]</span> Dashboard initialized...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: QUANTUM -->
+            <div id="view-quantum" class="absolute inset-0 flex flex-col gap-6 transition-opacity opacity-0 pointer-events-none z-0">
+                <div class="grid grid-cols-2 gap-6 h-full">
+                    <div class="glass p-6 rounded-xl">
+                        <h3 class="mb-4 text-[#a78bfa] font-bold">RL AGENT PERFORMANCE</h3>
+                        <div class="h-64">
+                            <canvas id="chart-rl"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-xl">
+                        <h3 class="mb-4 text-blue-400 font-bold">QUANTUM NODE LOGS</h3>
+                        <div class="h-full bg-black/40 rounded p-4 mono text-xs overflow-y-auto text-green-500/80">
+                            > Initializing Q-Nodes...<br>
+                            > Node 1: STANDBY<br>
+                            > Node 2: STANDBY<br>
+                            > Node 3: STANDBY
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: UNKNOWN -->
+            <div id="view-unknown" class="absolute inset-0 flex flex-col gap-6 transition-opacity opacity-0 pointer-events-none z-0">
+                <div class="glass p-8 rounded-xl border-l-4 border-red-500 h-full">
+                    <h2 class="text-2xl font-bold text-red-500 mb-4">UNKNOWN ENGINE</h2>
+                    <p class="text-gray-400 mb-4">Monitoring anomalous genomic signals via ZeroMQ stream.</p>
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gray-900 p-4 rounded border border-gray-800">
+                            <div class="text-xs text-gray-500">Hypotheses Generated</div>
+                            <div class="text-xl font-bold text-white">124</div>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded border border-gray-800">
+                            <div class="text-xs text-gray-500">Clusters Found</div>
+                            <div class="text-xl font-bold text-white">8</div>
+                        </div>
+                    </div>
+                    <div id="unknown-logs" class="bg-black/50 p-4 rounded h-96 overflow-y-auto mono text-xs text-red-300">
+                        Waiting for stream...
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: RAG -->
+            <div id="view-rag" class="absolute inset-0 flex flex-col gap-6 transition-opacity opacity-0 pointer-events-none z-0">
+                <div class="glass p-6 rounded-xl flex-1 flex flex-col">
+                     <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                        <span class="w-1 h-4 bg-purple-500 rounded-sm"></span>
+                        ORACLE KNOWLEDGE RETRIEVAL
+                    </h3>
+                    <div id="rag-list" class="flex-1 overflow-y-auto space-y-2">
+                        <!-- Items -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- TABS ---
+        function switchTab(id) {
+            // Reset Btns
+            ['global', 'quantum', 'unknown', 'rag'].forEach(t => {
+                const btn = document.getElementById('btn-' + t);
+                const view = document.getElementById('view-' + t);
+                
+                if (t === id) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive');
+                    view.classList.remove('opacity-0', 'pointer-events-none');
+                    view.classList.add('opacity-100', 'z-10');
+                } else {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive');
+                    view.classList.add('opacity-0', 'pointer-events-none');
+                    view.classList.remove('opacity-100', 'z-10');
+                }
+            });
+        }
+
+        // --- CLOCK ---
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+        // --- DATA FETCH ---
+        const API_URL = window.location.origin; // Dynamically use current host/port
+
+        async function updateStats() {
+            try {
+                const res = await fetch(API_URL + '/genomics_stats');
+                if(!res.ok) return;
+                const data = await res.json();
+                
+                document.getElementById('stat-genes').innerText = data.total_genes || 0;
+                
+                // Update Matrix
+                const grid = document.getElementById('chrom-grid');
+                grid.innerHTML = '';
+                
+                // Sort chroms
+                const keys = Object.keys(data.chromosomes || {}).sort((a,b) => {
+                    const natA = parseInt(a.replace(/\D/g,''));
+                    const natB = parseInt(b.replace(/\D/g,''));
+                    return (natA || 99) - (natB || 99);
+                });
+                
+                let decodedCount = 0;
+                let kbCount = 0;
+
+                keys.forEach(k => {
+                    const info = data.chromosomes[k];
+                    const num = k.replace('chrom_', '').toUpperCase();
+                    if(info.completed > 0) decodedCount++;
+                    kbCount += info.completed;
+                    
+                    const el = document.createElement('div');
+                    const isActive = info.completed > 0;
+                    el.className = `p-3 rounded border text-center ${isActive ? 'bg-[#00ff9d]/10 border-[#00ff9d] text-[#00ff9d]' : 'bg-gray-800/50 border-gray-700 text-gray-500'} matrix-cell`;
+                    el.innerHTML = `
+                        <div class="text-xs font-bold mb-1">${num}</div>
+                        <div class="h-1 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-current" style="width: ${isActive ? '100%' : '5%'}"></div>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                });
+
+                document.getElementById('stat-decoded').innerText = decodedCount;
+                document.getElementById('stat-kb').innerText = kbCount;
+
+            } catch(e) { console.error(e); }
+        }
+
+        async function updateOracle() {
+             try {
+                const res = await fetch(API_URL + '/oracle_insights');
+                const data = await res.json();
+                const list = document.getElementById('rag-list');
+                list.innerHTML = '';
+                
+                data.forEach(item => {
+                    const d = document.createElement('div');
+                    d.className = "p-3 bg-gray-900/50 border border-gray-800 rounded flex justify-between items-center hover:bg-gray-800 transition-colors";
+                    d.innerHTML = `
+                        <div>
+                            <div class="text-sm font-bold text-[#a78bfa]">${item.gene_id}</div>
+                            <div class="text-xs text-gray-400 truncate max-w-lg">${item.hypothesis || 'Pending analysis...'}</div>
+                        </div>
+                        <span class="px-2 py-1 bg-purple-900/30 text-purple-400 text-[10px] uppercase rounded border border-purple-500/30">${item.verdict || 'PROCESSING'}</span>
+                    `;
+                    list.appendChild(d);
+                });
+             } catch(e) {}
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            // Init Chart
+            const ctx = document.getElementById('chart-rl').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(10).fill(''),
+                    datasets: [{
+                        label: 'Reward',
+                        data: Array(10).fill(0).map(() => Math.random()),
+                        borderColor: '#a78bfa',
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#333' } } } }
+            });
+
+            setInterval(updateStats, 2000);
+            setInterval(updateOracle, 5000);
+            updateStats();
+            updateOracle();
+        };
+
+    </script>
+</body>
+</html>

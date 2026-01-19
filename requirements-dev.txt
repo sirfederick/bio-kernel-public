@@ -1,0 +1,15 @@
+# Paquetes necesarios para el entorno de desarrollo
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-cov>=5.0
+anyio
+mypy
+flake8
+jsonschema>=4.21
+black>=24.3
+ruff>=0.4
+isort
+pre-commit
+tox
+types-PyYAML
+types-requests
